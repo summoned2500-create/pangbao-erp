@@ -7,4 +7,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('缺少 Supabase 環境變數，請設定 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+)
