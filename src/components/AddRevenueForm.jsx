@@ -1,28 +1,45 @@
 import React, { useState } from 'react'
 import { supabase } from '../supabase.js'
-import { REVENUE_CHANNELS } from '../theme.js'
+import { ICHEF_CHANNELS, DELIVERY_CHANNELS } from '../theme.js'
 import { format } from 'date-fns'
 
+const UBER_COMMISSION = 0.32
+
 export default function AddRevenueForm({ date, onAdded, compact = false }) {
-  const [channel, setChannel] = useState(REVENUE_CHANNELS[0].value)
+  const [channel, setChannel] = useState(ICHEF_CHANNELS[0].value)
   const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
+  const [uberDeduct, setUberDeduct] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const isUber = channel === 'Uber Eats 外送'
+  const rawAmount = Number(amount) || 0
+  const netAmount = isUber && uberDeduct
+    ? Math.round(rawAmount * (1 - UBER_COMMISSION))
+    : rawAmount
+  const commission = rawAmount - netAmount
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    if (!amount || isNaN(amount) || rawAmount <= 0) {
       setError('請輸入有效金額')
       return
     }
     setLoading(true)
     setError('')
+
+    let finalNote = note.trim()
+    if (isUber && uberDeduct && rawAmount > 0) {
+      const deductNote = `[Uber Eats 原始訂單: $${rawAmount.toLocaleString('zh-TW')} / 平台抽成 32%: -$${commission.toLocaleString('zh-TW')}]`
+      finalNote = finalNote ? `${finalNote} ${deductNote}` : deductNote
+    }
+
     const { error: err } = await supabase.from('revenue_entries').insert([{
       date: format(date, 'yyyy-MM-dd'),
       channel,
-      amount: Number(amount),
-      note: note.trim(),
+      amount: netAmount,
+      note: finalNote,
     }])
     setLoading(false)
     if (err) { setError(err.message); return }
@@ -31,29 +48,69 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
     onAdded && onAdded()
   }
 
+  const selectChannel = (val) => {
+    setChannel(val)
+    setError('')
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+
+      {/* iCHEF 門市 */}
       <div>
-        <label className="block text-xs mb-1" style={{ color: '#86efac' }}>收款管道</label>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span className="text-xs font-semibold" style={{ color: '#4ade80' }}>🍽️ 門市營收 (iCHEF)</span>
+        </div>
         <div className="grid grid-cols-3 gap-1.5">
-          {REVENUE_CHANNELS.map((ch) => (
+          {ICHEF_CHANNELS.map((ch) => (
             <button type="button" key={ch.value}
-              onClick={() => setChannel(ch.value)}
-              className="flex items-center gap-1 px-2 py-2 rounded-lg text-xs font-medium transition-all"
+              onClick={() => selectChannel(ch.value)}
+              className="flex flex-col items-center gap-0.5 px-1 py-2 rounded-lg text-xs font-medium transition-all"
               style={{
                 background: channel === ch.value ? ch.color + '33' : '#1a2e1f',
                 border: `1px solid ${channel === ch.value ? ch.color : '#2d4a32'}`,
                 color: channel === ch.value ? ch.color : '#86efac',
               }}>
               <span>{ch.icon}</span>
-              <span className="truncate">{ch.label}</span>
+              <span className="truncate w-full text-center leading-tight">{ch.label}</span>
+            </button>
+          ))}
+        </div>
+        {channel === 'iCHEF 門市日結總額' && (
+          <div className="mt-1 px-2 py-1 rounded-lg text-xs" style={{ background: '#1a2e1f', color: '#4b7a56' }}>
+            💡 選擇日結總額後，無需再單獨記各支付細項
+          </div>
+        )}
+      </div>
+
+      {/* Uber Eats 外送 */}
+      <div>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span className="text-xs font-semibold" style={{ color: '#fbbf24' }}>🛵 外送營收</span>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {DELIVERY_CHANNELS.map((ch) => (
+            <button type="button" key={ch.value}
+              onClick={() => selectChannel(ch.value)}
+              className="flex flex-col items-center gap-0.5 px-1 py-2 rounded-lg text-xs font-medium transition-all"
+              style={{
+                background: channel === ch.value ? ch.color + '33' : '#1a2e1f',
+                border: `1px solid ${channel === ch.value ? ch.color : '#2d4a32'}`,
+                color: channel === ch.value ? ch.color : '#86efac',
+              }}>
+              <span>{ch.icon}</span>
+              <span className="truncate w-full text-center">{ch.label}</span>
             </button>
           ))}
         </div>
       </div>
+
+      {/* 金額 */}
       <div>
-        <label className="block text-xs mb-1" style={{ color: '#86efac' }}>金額（NT$）</label>
-        <input type="number" step="0.01" min="0" placeholder="0"
+        <label className="block text-xs mb-1" style={{ color: '#86efac' }}>
+          {isUber && uberDeduct ? '訂單金額（NT$，扣除佣金前）' : '金額（NT$）'}
+        </label>
+        <input type="number" step="1" min="0" placeholder="0"
           value={amount} onChange={(e) => setAmount(e.target.value)}
           className="w-full rounded-lg px-3 py-2.5 text-sm outline-none"
           style={{ background: '#1a2e1f', border: '1px solid #2d4a32', color: '#e2f5e8' }}
@@ -61,6 +118,30 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
           onBlur={(e) => e.target.style.borderColor = '#2d4a32'}
         />
       </div>
+
+      {/* Uber Eats 扣除 Toggle */}
+      {isUber && (
+        <div className="rounded-lg p-3 space-y-2" style={{ background: '#1a2e1f', border: '1px solid #fbbf2433' }}>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={uberDeduct} onChange={(e) => setUberDeduct(e.target.checked)}
+              className="rounded"
+              style={{ accentColor: '#fbbf24', width: 16, height: 16 }}
+            />
+            <span className="text-xs" style={{ color: '#fbbf24' }}>
+              自動計算實收淨額（扣除 32% 平台佣金）
+            </span>
+          </label>
+          {uberDeduct && rawAmount > 0 && (
+            <div className="text-xs space-y-0.5 pl-6" style={{ color: '#4b7a56' }}>
+              <div>訂單金額：<span style={{ color: '#e2f5e8' }}>NT${rawAmount.toLocaleString('zh-TW')}</span></div>
+              <div>平台抽成 32%：<span style={{ color: '#fca5a5' }}>-NT${commission.toLocaleString('zh-TW')}</span></div>
+              <div>實收淨額：<span style={{ color: '#4ade80', fontWeight: 700 }}>NT${netAmount.toLocaleString('zh-TW')}</span></div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 備註 */}
       <div>
         <label className="block text-xs mb-1" style={{ color: '#86efac' }}>備註（選填）</label>
         <input type="text" placeholder="備註..."
@@ -71,11 +152,13 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
           onBlur={(e) => e.target.style.borderColor = '#2d4a32'}
         />
       </div>
+
       {error && <p className="text-xs text-red-400">{error}</p>}
+
       <button type="submit" disabled={loading}
         className="w-full py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95"
         style={{ background: loading ? '#2d4a32' : 'linear-gradient(135deg,#4ade80,#22c55e)', color: '#0a1a0f' }}>
-        {loading ? '新增中...' : '✓ 新增營收'}
+        {loading ? '新增中...' : `✓ 新增營收${isUber && uberDeduct && netAmount > 0 ? `（NT$${netAmount.toLocaleString('zh-TW')}）` : ''}`}
       </button>
     </form>
   )

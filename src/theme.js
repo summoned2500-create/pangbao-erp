@@ -6,14 +6,23 @@ export const COST_CATEGORIES = [
   { value: '紙類雜項', label: '紙類雜項', color: '#a5b4fc', icon: '📦' },
 ]
 
-export const REVENUE_CHANNELS = [
-  { value: '現金', label: '現金', color: '#4ade80', icon: '💵' },
+// 門市營收 (iCHEF POS 管道)
+export const ICHEF_CHANNELS = [
+  { value: 'iCHEF 門市日結總額', label: '日結總額', color: '#4ade80', icon: '🍽️', hint: '選此項無需再記各支付細項' },
+  { value: '門市現金', label: '門市現金', color: '#86efac', icon: '💵' },
   { value: 'LINE Pay', label: 'LINE Pay', color: '#22c55e', icon: '💚' },
   { value: '全支付', label: '全支付', color: '#34d399', icon: '📱' },
   { value: '台灣 Pay', label: '台灣 Pay', color: '#6ee7b7', icon: '🇹🇼' },
-  { value: 'iCHEF', label: 'iCHEF', color: '#86efac', icon: '🍽️' },
-  { value: 'Uber Eats', label: 'Uber Eats', color: '#bbf7d0', icon: '🛵' },
+  { value: '信用卡/其他', label: '信用卡/其他', color: '#a5b4fc', icon: '💳' },
 ]
+
+// 外送營收
+export const DELIVERY_CHANNELS = [
+  { value: 'Uber Eats 外送', label: 'Uber Eats', color: '#fbbf24', icon: '🛵', commission: 0.32 },
+]
+
+// 全部營收管道（供顯示用）
+export const REVENUE_CHANNELS = [...ICHEF_CHANNELS, ...DELIVERY_CHANNELS]
 
 export const formatCurrency = (amount) => {
   if (amount == null) return 'NT$0'
