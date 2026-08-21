@@ -1,0 +1,43 @@
+name: Daily Supabase Backup
+
+on:
+  schedule:
+    - cron: '0 16 * * *'  # 每天台灣時間 00:00 (UTC 16:00)
+  workflow_dispatch:       # 也可在 GitHub 上手動觸發
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch transactions from Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          mkdir -p backups
+          DATE=$(TZ=Asia/Taipei date +%Y-%m-%d)
+          curl -s \
+            "${SUPABASE_URL}/rest/v1/transactions?select=*&order=date.asc" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -o "backups/transactions_${DATE}.json"
+          echo "備份完成：transactions_${DATE}.json"
+
+      - name: 只保留最近 30 天備份
+        run: |
+          cd backups
+          ls -t transactions_*.json | tail -n +31 | xargs -r rm --
+          echo "舊備份清理完成"
+
+      - name: Commit & push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add backups/
+          git diff --staged --quiet && echo "無變更，略過 commit" || \
+            git commit -m "backup: $(TZ=Asia/Taipei date +%Y-%m-%d) [skip vercel]" && git push
