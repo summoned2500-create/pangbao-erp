@@ -132,7 +132,7 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
               style={{ accentColor: '#fbbf24', width: 16, height: 16 }}
             />
             <span className="text-xs" style={{ color: '#fbbf24' }}>
-              自動計算實收淨額（扣除 32% 平台佣金）
+              自動計算實收淨額（扣除 35% 平台佣金）
             </span>
           </label>
           {uberDeduct && rawAmount > 0 && (

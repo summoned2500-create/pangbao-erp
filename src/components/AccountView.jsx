@@ -63,7 +63,7 @@ export default function AccountView({ entries, onDelete, loading }) {
             <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #2d4a32' }}>
               {dayEntries.map((e, i) => {
                 const isCost = e.type === 'cost'
-                const meta = isCost ? getCostCategory(e.category) : getRevenueChannel(e.channel)
+                const meta = isCost ? getCostCategory(e.category) : getRevenueChannel(e.category)
                 return (
                   <div key={e.id} className="flex items-center justify-between px-3 py-2.5"
                     style={{
@@ -77,7 +77,7 @@ export default function AccountView({ entries, onDelete, loading }) {
                       </div>
                       <div>
                         <div className="text-sm" style={{ color: '#e2f5e8' }}>
-                          {isCost ? e.category : e.channel}
+                          {e.category}
                         </div>
                         {e.note && <div className="text-xs" style={{ color: '#4b7a56' }}>{e.note}</div>}
                         <div className="text-xs" style={{ color: '#2d4a32' }}>
