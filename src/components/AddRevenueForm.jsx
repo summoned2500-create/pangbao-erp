@@ -3,7 +3,7 @@ import { insertTransaction } from '../supabase.js'
 import { ICHEF_CHANNELS, DELIVERY_CHANNELS } from '../theme.js'
 import { format } from 'date-fns'
 
-const UBER_COMMISSION = 0.32
+const UBER_COMMISSION = 0.35
 
 export default function AddRevenueForm({ date, onAdded, compact = false }) {
   const [channel, setChannel] = useState(ICHEF_CHANNELS[0].value)
@@ -31,7 +31,7 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
 
     let finalNote = note.trim()
     if (isUber && uberDeduct && rawAmount > 0) {
-      const deductNote = `[Uber Eats 原始訂單: $${rawAmount.toLocaleString('zh-TW')} / 平台抽成 32%: -$${commission.toLocaleString('zh-TW')}]`
+      const deductNote = `[Uber Eats 原始訂單: $${rawAmount.toLocaleString('zh-TW')} / 平台抽成 35%: -$${commission.toLocaleString('zh-TW')}]`
       finalNote = finalNote ? `${finalNote} ${deductNote}` : deductNote
     }
 
@@ -138,7 +138,7 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
           {uberDeduct && rawAmount > 0 && (
             <div className="text-xs space-y-0.5 pl-6" style={{ color: '#4b7a56' }}>
               <div>訂單金額：<span style={{ color: '#e2f5e8' }}>NT${rawAmount.toLocaleString('zh-TW')}</span></div>
-              <div>平台抽成 32%：<span style={{ color: '#fca5a5' }}>-NT${commission.toLocaleString('zh-TW')}</span></div>
+              <div>平台抽成 35%：<span style={{ color: '#fca5a5' }}>-NT${commission.toLocaleString('zh-TW')}</span></div>
               <div>實收淨額：<span style={{ color: '#4ade80', fontWeight: 700 }}>NT${netAmount.toLocaleString('zh-TW')}</span></div>
             </div>
           )}
