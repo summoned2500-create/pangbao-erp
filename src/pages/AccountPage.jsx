@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { format, subDays, startOfMonth } from 'date-fns'
-import { supabase } from '../supabase.js'
+import { supabase, deleteTransaction } from '../supabase.js'
 import AccountView from '../components/AccountView.jsx'
 import { formatCurrency } from '../theme.js'
 
@@ -17,7 +17,7 @@ export default function AccountPage({ refreshKey }) {
   const [toDate, setToDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all') // all | cost | revenue
+  const [filter, setFilter] = useState('all')
 
   const applyRange = (idx) => {
     setRangeIdx(idx)
@@ -30,22 +30,21 @@ export default function AccountPage({ refreshKey }) {
 
   const fetchData = useCallback(async () => {
     setLoading(true)
-    const [{ data: costs }, { data: revenues }] = await Promise.all([
-      supabase.from('cost_entries').select('*').gte('date', fromDate).lte('date', toDate).order('date', { ascending: false }).order('created_at', { ascending: false }),
-      supabase.from('revenue_entries').select('*').gte('date', fromDate).lte('date', toDate).order('date', { ascending: false }).order('created_at', { ascending: false }),
-    ])
-    const costItems = (costs || []).map(e => ({ ...e, type: 'cost' }))
-    const revenueItems = (revenues || []).map(e => ({ ...e, type: 'revenue' }))
-    const merged = [...costItems, ...revenueItems].sort((a, b) => b.date.localeCompare(a.date) || b.created_at?.localeCompare(a.created_at || '') || 0)
-    setEntries(merged)
+    const { data } = await supabase
+      .from('transactions')
+      .select('*')
+      .gte('date', fromDate)
+      .lte('date', toDate)
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false })
+    setEntries(data || [])
     setLoading(false)
   }, [fromDate, toDate])
 
   useEffect(() => { fetchData() }, [fetchData, refreshKey])
 
-  const handleDelete = async (id, type) => {
-    const table = type === 'cost' ? 'cost_entries' : 'revenue_entries'
-    await supabase.from(table).delete().eq('id', id)
+  const handleDelete = async (id) => {
+    await deleteTransaction(id)
     fetchData()
   }
 
@@ -54,16 +53,43 @@ export default function AccountPage({ refreshKey }) {
   const totalRevenue = entries.filter(e => e.type === 'revenue').reduce((s, e) => s + Number(e.amount), 0)
   const profit = totalRevenue - totalCost
 
+  // CSV 匯出
+  const exportCSV = () => {
+    const BOM = '﻿'
+    const headers = '日期,類型,類別項目,金額,備註'
+    const rows = filtered.map(e => [
+      e.date,
+      e.type === 'revenue' ? '營收' : '成本',
+      e.category,
+      e.amount,
+      (e.note || '').replace(/,/g, '，'),
+    ].join(','))
+    const csv = BOM + [headers, ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `胖寶ERP_${fromDate}_${toDate}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div style={{ background: '#0a1a0f', minHeight: '100%' }}>
       {/* Header */}
       <div className="px-4 pt-4 pb-3" style={{ background: '#122018', borderBottom: '1px solid #2d4a32' }}>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xl">📒</span>
-          <span className="text-lg font-bold" style={{ color: '#4ade80' }}>帳戶明細</span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📒</span>
+            <span className="text-lg font-bold" style={{ color: '#4ade80' }}>帳戶明細</span>
+          </div>
+          <button onClick={exportCSV}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+            style={{ background: '#1a2e1f', color: '#86efac', border: '1px solid #2d4a32' }}>
+            ↓ 匯出 CSV
+          </button>
         </div>
 
-        {/* Range picker */}
         <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
           {RANGES.map((r, i) => (
             <button key={r.label} onClick={() => applyRange(i)}
@@ -78,7 +104,6 @@ export default function AccountPage({ refreshKey }) {
           ))}
         </div>
 
-        {/* Custom date inputs */}
         {rangeIdx === 3 && (
           <div className="flex gap-2 mb-3">
             {[['from', fromDate, setFromDate], ['to', toDate, setToDate]].map(([key, val, set]) => (
@@ -91,7 +116,6 @@ export default function AccountPage({ refreshKey }) {
           </div>
         )}
 
-        {/* Summary */}
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: '成本', value: totalCost, color: '#fca5a5' },
@@ -106,7 +130,6 @@ export default function AccountPage({ refreshKey }) {
         </div>
       </div>
 
-      {/* Filter tabs */}
       <div className="flex gap-1.5 px-3 pt-3 pb-2">
         {[['all','全部'],['cost','成本'],['revenue','營收']].map(([key, label]) => (
           <button key={key} onClick={() => setFilter(key)}
@@ -124,7 +147,6 @@ export default function AccountPage({ refreshKey }) {
         ))}
       </div>
 
-      {/* List */}
       <div className="px-3 pb-4">
         <AccountView entries={filtered} onDelete={handleDelete} loading={loading} />
       </div>

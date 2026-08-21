@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
-import { supabase } from '../supabase.js'
+import { supabase, deleteTransaction } from '../supabase.js'
 import { formatCurrency, getCostCategory, getRevenueChannel } from '../theme.js'
 import AddCostForm from './AddCostForm.jsx'
 import AddRevenueForm from './AddRevenueForm.jsx'
@@ -15,12 +15,14 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
 
   const fetchData = useCallback(async () => {
     setLoading(true)
-    const [{ data: costs }, { data: revenues }] = await Promise.all([
-      supabase.from('cost_entries').select('*').eq('date', dateStr).order('created_at', { ascending: false }),
-      supabase.from('revenue_entries').select('*').eq('date', dateStr).order('created_at', { ascending: false }),
-    ])
-    setCostEntries(costs || [])
-    setRevenueEntries(revenues || [])
+    const { data } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('date', dateStr)
+      .order('created_at', { ascending: false })
+    const all = data || []
+    setCostEntries(all.filter(e => e.type === 'cost'))
+    setRevenueEntries(all.filter(e => e.type === 'revenue'))
     setLoading(false)
   }, [dateStr])
 
@@ -30,14 +32,8 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
   const totalRevenue = revenueEntries.reduce((s, e) => s + Number(e.amount), 0)
   const profit = totalRevenue - totalCost
 
-  const deleteCost = async (id) => {
-    await supabase.from('cost_entries').delete().eq('id', id)
-    fetchData()
-    onDataChanged && onDataChanged()
-  }
-
-  const deleteRevenue = async (id) => {
-    await supabase.from('revenue_entries').delete().eq('id', id)
+  const handleDelete = async (id) => {
+    await deleteTransaction(id)
     fetchData()
     onDataChanged && onDataChanged()
   }
@@ -105,7 +101,6 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
           </div>
         ) : (
           <>
-            {/* Summary Tab */}
             {tab === 'summary' && (
               <div className="space-y-3">
                 {costEntries.length > 0 && (
@@ -136,14 +131,14 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
                     <div className="text-xs font-semibold mb-2 px-1" style={{ color: '#4ade80' }}>營收明細</div>
                     <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #2d4a32' }}>
                       {revenueEntries.map((e, i) => {
-                        const ch = getRevenueChannel(e.channel)
+                        const ch = getRevenueChannel(e.category)
                         return (
                           <div key={e.id} className="flex items-center justify-between px-3 py-2.5"
                             style={{ borderBottom: i < revenueEntries.length-1 ? '1px solid #1a2e1f' : 'none', background: '#122018' }}>
                             <div className="flex items-center gap-2">
                               <span>{ch.icon}</span>
                               <div>
-                                <div className="text-sm" style={{ color: '#e2f5e8' }}>{e.channel}</div>
+                                <div className="text-sm" style={{ color: '#e2f5e8' }}>{e.category}</div>
                                 {e.note && <div className="text-xs" style={{ color: '#4b7a56' }}>{e.note}</div>}
                               </div>
                             </div>
@@ -163,7 +158,6 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
               </div>
             )}
 
-            {/* Cost Tab */}
             {tab === 'cost' && (
               <div className="space-y-4">
                 <AddCostForm date={date} onAdded={handleAdded} />
@@ -185,8 +179,8 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="font-semibold text-sm" style={{ color: '#fca5a5' }}>{formatCurrency(e.amount)}</div>
-                              <button onClick={() => deleteCost(e.id)}
-                                className="w-7 h-7 flex items-center justify-center rounded-full transition-colors"
+                              <button onClick={() => handleDelete(e.id)}
+                                className="w-7 h-7 flex items-center justify-center rounded-full"
                                 style={{ background: '#2d1a1a', color: '#f87171' }}>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
                                   <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
@@ -203,7 +197,6 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
               </div>
             )}
 
-            {/* Revenue Tab */}
             {tab === 'revenue' && (
               <div className="space-y-4">
                 <AddRevenueForm date={date} onAdded={handleAdded} />
@@ -212,20 +205,20 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
                     <div className="text-xs font-semibold mb-2 px-1" style={{ color: '#4b7a56' }}>已記錄營收</div>
                     <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #2d4a32' }}>
                       {revenueEntries.map((e, i) => {
-                        const ch = getRevenueChannel(e.channel)
+                        const ch = getRevenueChannel(e.category)
                         return (
                           <div key={e.id} className="flex items-center justify-between px-3 py-2.5"
                             style={{ borderBottom: i < revenueEntries.length-1 ? '1px solid #1a2e1f' : 'none', background: '#122018' }}>
                             <div className="flex items-center gap-2">
                               <span>{ch.icon}</span>
                               <div>
-                                <div className="text-sm" style={{ color: '#e2f5e8' }}>{e.channel}</div>
+                                <div className="text-sm" style={{ color: '#e2f5e8' }}>{e.category}</div>
                                 {e.note && <div className="text-xs" style={{ color: '#4b7a56' }}>{e.note}</div>}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="font-semibold text-sm" style={{ color: '#4ade80' }}>{formatCurrency(e.amount)}</div>
-                              <button onClick={() => deleteRevenue(e.id)}
+                              <button onClick={() => handleDelete(e.id)}
                                 className="w-7 h-7 flex items-center justify-center rounded-full"
                                 style={{ background: '#2d1a1a', color: '#f87171' }}>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">

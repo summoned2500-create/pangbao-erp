@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { supabase } from '../supabase.js'
+import { insertTransaction } from '../supabase.js'
 import { COST_CATEGORIES } from '../theme.js'
 import { format } from 'date-fns'
 
@@ -18,17 +18,22 @@ export default function AddCostForm({ date, onAdded, compact = false }) {
     }
     setLoading(true)
     setError('')
-    const { error: err } = await supabase.from('cost_entries').insert([{
-      date: format(date, 'yyyy-MM-dd'),
-      category,
-      amount: Number(amount),
-      note: note.trim(),
-    }])
-    setLoading(false)
-    if (err) { setError(err.message); return }
-    setAmount('')
-    setNote('')
-    onAdded && onAdded()
+    try {
+      await insertTransaction({
+        date: format(date, 'yyyy-MM-dd'),
+        type: 'cost',
+        category,
+        amount: Number(amount),
+        note: note.trim(),
+      })
+      setAmount('')
+      setNote('')
+      onAdded && onAdded()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

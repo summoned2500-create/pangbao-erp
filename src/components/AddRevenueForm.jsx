@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { supabase } from '../supabase.js'
+import { insertTransaction } from '../supabase.js'
 import { ICHEF_CHANNELS, DELIVERY_CHANNELS } from '../theme.js'
 import { format } from 'date-fns'
 
@@ -35,17 +35,22 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
       finalNote = finalNote ? `${finalNote} ${deductNote}` : deductNote
     }
 
-    const { error: err } = await supabase.from('revenue_entries').insert([{
-      date: format(date, 'yyyy-MM-dd'),
-      channel,
-      amount: netAmount,
-      note: finalNote,
-    }])
-    setLoading(false)
-    if (err) { setError(err.message); return }
-    setAmount('')
-    setNote('')
-    onAdded && onAdded()
+    try {
+      await insertTransaction({
+        date: format(date, 'yyyy-MM-dd'),
+        type: 'revenue',
+        category: channel,
+        amount: netAmount,
+        note: finalNote,
+      })
+      setAmount('')
+      setNote('')
+      onAdded && onAdded()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const selectChannel = (val) => {
@@ -124,7 +129,6 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
         <div className="rounded-lg p-3 space-y-2" style={{ background: '#1a2e1f', border: '1px solid #fbbf2433' }}>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={uberDeduct} onChange={(e) => setUberDeduct(e.target.checked)}
-              className="rounded"
               style={{ accentColor: '#fbbf24', width: 16, height: 16 }}
             />
             <span className="text-xs" style={{ color: '#fbbf24' }}>

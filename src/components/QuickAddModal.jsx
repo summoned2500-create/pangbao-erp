@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import AddCostForm from './AddCostForm.jsx'
 import AddRevenueForm from './AddRevenueForm.jsx'
+import QuickTextParser from './QuickTextParser.jsx'
 
 export default function QuickAddModal({ onClose, onAdded }) {
   const [tab, setTab] = useState('cost')
@@ -10,7 +11,7 @@ export default function QuickAddModal({ onClose, onAdded }) {
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full max-w-lg rounded-t-2xl shadow-2xl overflow-hidden"
-        style={{ background: '#122018', border: '1px solid #2d4a32', maxHeight: '90vh' }}>
+        style={{ background: '#122018', border: '1px solid #2d4a32', maxHeight: '92vh' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <div className="flex items-center gap-2">
@@ -26,9 +27,13 @@ export default function QuickAddModal({ onClose, onAdded }) {
 
         {/* Tabs */}
         <div className="flex mx-4 mb-4 rounded-lg overflow-hidden" style={{ background: '#1a2e1f', border: '1px solid #2d4a32' }}>
-          {[['cost','💸 成本'],['revenue','💰 營收']].map(([key, label]) => (
+          {[
+            ['cost', '💸 成本'],
+            ['revenue', '💰 營收'],
+            ['quick', '⚡ 打烊速記'],
+          ].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
-              className="flex-1 py-2 text-sm font-semibold transition-all"
+              className="flex-1 py-2 text-xs font-semibold transition-all"
               style={{
                 background: tab === key ? 'linear-gradient(135deg,#4ade80,#22c55e)' : 'transparent',
                 color: tab === key ? '#0a1a0f' : '#86efac',
@@ -39,11 +44,10 @@ export default function QuickAddModal({ onClose, onAdded }) {
         </div>
 
         {/* Form */}
-        <div className="px-4 pb-6 overflow-y-auto" style={{ maxHeight: '60vh' }}>
-          {tab === 'cost'
-            ? <AddCostForm date={today} onAdded={onAdded} compact />
-            : <AddRevenueForm date={today} onAdded={onAdded} compact />
-          }
+        <div className="px-4 pb-6 overflow-y-auto" style={{ maxHeight: '70vh' }}>
+          {tab === 'cost' && <AddCostForm date={today} onAdded={onAdded} compact />}
+          {tab === 'revenue' && <AddRevenueForm date={today} onAdded={onAdded} compact />}
+          {tab === 'quick' && <QuickTextParser date={today} onAdded={onAdded} onClose={onClose} />}
         </div>
       </div>
     </div>

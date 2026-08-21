@@ -17,26 +17,27 @@ export default function CalendarPage({ refreshKey }) {
     const start = format(startOfMonth(currentMonth), 'yyyy-MM-dd')
     const end = format(endOfMonth(currentMonth), 'yyyy-MM-dd')
 
-    const [{ data: costs }, { data: revenues }] = await Promise.all([
-      supabase.from('cost_entries').select('date, amount').gte('date', start).lte('date', end),
-      supabase.from('revenue_entries').select('date, amount').gte('date', start).lte('date', end),
-    ])
+    const { data } = await supabase
+      .from('transactions')
+      .select('date, type, amount')
+      .gte('date', start)
+      .lte('date', end)
 
-    const data = {}
+    const dayMap = {}
     let totalCost = 0, totalRevenue = 0
 
-    ;(costs || []).forEach(({ date, amount }) => {
-      if (!data[date]) data[date] = { cost: 0, revenue: 0 }
-      data[date].cost += Number(amount)
-      totalCost += Number(amount)
-    })
-    ;(revenues || []).forEach(({ date, amount }) => {
-      if (!data[date]) data[date] = { cost: 0, revenue: 0 }
-      data[date].revenue += Number(amount)
-      totalRevenue += Number(amount)
+    ;(data || []).forEach(({ date, type, amount }) => {
+      if (!dayMap[date]) dayMap[date] = { cost: 0, revenue: 0 }
+      if (type === 'cost') {
+        dayMap[date].cost += Number(amount)
+        totalCost += Number(amount)
+      } else {
+        dayMap[date].revenue += Number(amount)
+        totalRevenue += Number(amount)
+      }
     })
 
-    setDailyData(data)
+    setDailyData(dayMap)
     setMonthSummary({ cost: totalCost, revenue: totalRevenue })
     setLoading(false)
   }, [currentMonth])
@@ -57,7 +58,6 @@ export default function CalendarPage({ refreshKey }) {
             <span className="text-xl">🥟</span>
             <span className="text-lg font-bold" style={{ color: '#4ade80' }}>胖寶 ERP</span>
           </div>
-          {/* Month nav */}
           <div className="flex items-center gap-2">
             <button onClick={prevMonth}
               className="w-8 h-8 flex items-center justify-center rounded-full transition-colors"
@@ -79,7 +79,6 @@ export default function CalendarPage({ refreshKey }) {
           </div>
         </div>
 
-        {/* Month summary */}
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: '月成本', value: monthSummary.cost, color: '#fca5a5', prefix: '-' },
@@ -96,7 +95,6 @@ export default function CalendarPage({ refreshKey }) {
         </div>
       </div>
 
-      {/* Calendar */}
       <div className="p-3">
         {loading ? (
           <div className="flex items-center justify-center h-64">
@@ -112,14 +110,12 @@ export default function CalendarPage({ refreshKey }) {
         )}
       </div>
 
-      {/* Legend */}
       <div className="flex items-center justify-center gap-4 pb-4 text-xs" style={{ color: '#4b7a56' }}>
         <span className="flex items-center gap-1"><span style={{ color: '#4ade80' }}>+</span>營收</span>
         <span className="flex items-center gap-1"><span style={{ color: '#fca5a5' }}>-</span>成本</span>
         <span className="flex items-center gap-1"><span style={{ color: '#86efac' }}>▲</span>利潤</span>
       </div>
 
-      {/* Day Detail Overlay */}
       {selectedDate && (
         <DayDetailView
           date={selectedDate}

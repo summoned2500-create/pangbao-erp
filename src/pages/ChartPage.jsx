@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { format, subDays, startOfMonth, startOfWeek, eachWeekOfInterval, eachMonthOfInterval, endOfMonth, endOfWeek, startOfYear } from 'date-fns'
+import { format, subDays, startOfYear, eachWeekOfInterval, eachMonthOfInterval, endOfMonth, endOfWeek } from 'date-fns'
 import { supabase } from '../supabase.js'
 import ChartView from '../components/ChartView.jsx'
 import { formatCurrency } from '../theme.js'
@@ -27,19 +27,18 @@ export default function ChartPage({ refreshKey }) {
       toDate = format(new Date(), 'yyyy-MM-dd')
     }
 
-    const [{ data: costs }, { data: revenues }] = await Promise.all([
-      supabase.from('cost_entries').select('date, amount').gte('date', fromDate).lte('date', toDate),
-      supabase.from('revenue_entries').select('date, amount').gte('date', fromDate).lte('date', toDate),
-    ])
+    const { data: rows } = await supabase
+      .from('transactions')
+      .select('date, type, amount')
+      .gte('date', fromDate)
+      .lte('date', toDate)
 
     const costMap = {}
     const revMap = {}
 
-    ;(costs || []).forEach(({ date, amount }) => {
-      costMap[date] = (costMap[date] || 0) + Number(amount)
-    })
-    ;(revenues || []).forEach(({ date, amount }) => {
-      revMap[date] = (revMap[date] || 0) + Number(amount)
+    ;(rows || []).forEach(({ date, type, amount }) => {
+      if (type === 'cost') costMap[date] = (costMap[date] || 0) + Number(amount)
+      else revMap[date] = (revMap[date] || 0) + Number(amount)
     })
 
     let chartData = []
@@ -50,10 +49,8 @@ export default function ChartPage({ refreshKey }) {
         chartData.push({
           label: format(new Date(d + 'T00:00:00'), 'M/d'),
           成本: costMap[d] || 0,
-          営収: revMap[d] || 0,
-          営収r: revMap[d] || 0,
+          '營收': revMap[d] || 0,
         })
-        chartData[chartData.length-1]['營收'] = revMap[d] || 0
       }
     } else if (period === 'weekly') {
       const start = subDays(new Date(), 83)
@@ -101,14 +98,12 @@ export default function ChartPage({ refreshKey }) {
 
   return (
     <div style={{ background: '#0a1a0f', minHeight: '100%' }}>
-      {/* Header */}
       <div className="px-4 pt-4 pb-3" style={{ background: '#122018', borderBottom: '1px solid #2d4a32' }}>
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xl">📈</span>
           <span className="text-lg font-bold" style={{ color: '#4ade80' }}>圖表分析</span>
         </div>
 
-        {/* Period + Chart type */}
         <div className="flex justify-between items-center gap-2">
           <div className="flex gap-1.5">
             {[['daily','日'],['weekly','週'],['monthly','月']].map(([key, label]) => (
@@ -139,7 +134,6 @@ export default function ChartPage({ refreshKey }) {
         </div>
       </div>
 
-      {/* KPI */}
       <div className="grid grid-cols-3 gap-2 px-3 pt-3">
         {[
           { label: period === 'daily' ? '近30天成本' : period === 'weekly' ? '近12週成本' : '今年成本', value: totalCost, color: '#fca5a5' },
@@ -153,7 +147,6 @@ export default function ChartPage({ refreshKey }) {
         ))}
       </div>
 
-      {/* Chart */}
       <div className="px-3 pt-3 pb-6">
         {loading ? (
           <div className="flex items-center justify-center h-52">
