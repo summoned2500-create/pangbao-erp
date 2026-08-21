@@ -44,8 +44,14 @@ export default function AccountPage({ refreshKey }) {
   useEffect(() => { fetchData() }, [fetchData, refreshKey])
 
   const handleDelete = async (id) => {
-    await deleteTransaction(id)
-    fetchData()
+    if (window.confirm('確定要刪除這筆紀錄嗎？')) {
+      try {
+        await deleteTransaction(id)
+        fetchData()
+      } catch (err) {
+        alert('刪除失敗：' + err.message)
+      }
+    }
   }
 
   const filtered = filter === 'all' ? entries : entries.filter(e => e.type === filter)
