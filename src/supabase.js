@@ -1,16 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://kbfjtzbkhclsttemkars.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtiZmp0emJraGNsc3R0ZW1rYXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDI4MTEsImV4cCI6MjA5MDcxODgxMX0.arC20m9UILHOQJkgD7i93Zdt-sfzHyIOMnCDVtqSLKw'
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('缺少 Supabase 環境變數，請設定 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY')
-}
-
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
-)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // 取得指定月份的所有交易資料
 export async function fetchTransactionsByMonth(year, month) {
