@@ -7,8 +7,8 @@
 }
 
 body {
-  background-color: #0a1a0f;
-  color: #e2f5e8;
+  background-color: #f4f6e4;
+  color: #1e2e08;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
   overscroll-behavior: none;
 }
@@ -17,10 +17,10 @@ body {
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #122018;
+  background: #e6eac8;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2d4a32;
+  background: #b5c265;
   border-radius: 2px;
 }
 

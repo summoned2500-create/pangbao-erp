@@ -97,11 +97,11 @@ export default function ChartPage({ refreshKey }) {
   const profit = totalRevenue - totalCost
 
   return (
-    <div style={{ background: '#0a1a0f', minHeight: '100%' }}>
-      <div className="px-4 pt-4 pb-3" style={{ background: '#122018', borderBottom: '1px solid #2d4a32' }}>
+    <div style={{ background: '#f4f6e4', minHeight: '100%' }}>
+      <div className="px-4 pt-4 pb-3" style={{ background: '#e6eac8', borderBottom: '1px solid #b5c265' }}>
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xl">📈</span>
-          <span className="text-lg font-bold" style={{ color: '#4ade80' }}>圖表分析</span>
+          <span className="text-lg font-bold" style={{ color: '#16a34a' }}>圖表分析</span>
         </div>
 
         <div className="flex justify-between items-center gap-2">
@@ -110,9 +110,9 @@ export default function ChartPage({ refreshKey }) {
               <button key={key} onClick={() => setPeriod(key)}
                 className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                 style={{
-                  background: period === key ? '#4ade80' : '#1a2e1f',
-                  color: period === key ? '#0a1a0f' : '#86efac',
-                  border: period === key ? 'none' : '1px solid #2d4a32',
+                  background: period === key ? '#16a34a' : '#ffffff',
+                  color: period === key ? '#f4f6e4' : '#2a7a40',
+                  border: period === key ? 'none' : '1px solid #b5c265',
                 }}>
                 {label}
               </button>
@@ -123,9 +123,9 @@ export default function ChartPage({ refreshKey }) {
               <button key={key} onClick={() => setChartType(key)}
                 className="w-8 h-8 rounded-lg text-sm font-bold transition-all"
                 style={{
-                  background: chartType === key ? '#4ade80' : '#1a2e1f',
-                  color: chartType === key ? '#0a1a0f' : '#86efac',
-                  border: chartType === key ? 'none' : '1px solid #2d4a32',
+                  background: chartType === key ? '#16a34a' : '#ffffff',
+                  color: chartType === key ? '#f4f6e4' : '#2a7a40',
+                  border: chartType === key ? 'none' : '1px solid #b5c265',
                 }}>
                 {icon}
               </button>
@@ -136,12 +136,12 @@ export default function ChartPage({ refreshKey }) {
 
       <div className="grid grid-cols-3 gap-2 px-3 pt-3">
         {[
-          { label: period === 'daily' ? '近30天成本' : period === 'weekly' ? '近12週成本' : '今年成本', value: totalCost, color: '#fca5a5' },
-          { label: period === 'daily' ? '近30天營收' : period === 'weekly' ? '近12週營收' : '今年營收', value: totalRevenue, color: '#4ade80' },
-          { label: '利潤', value: profit, color: profit >= 0 ? '#86efac' : '#f87171' },
+          { label: period === 'daily' ? '近30天成本' : period === 'weekly' ? '近12週成本' : '今年成本', value: totalCost, color: '#ef4444' },
+          { label: period === 'daily' ? '近30天營收' : period === 'weekly' ? '近12週營收' : '今年營收', value: totalRevenue, color: '#16a34a' },
+          { label: '利潤', value: profit, color: profit >= 0 ? '#2a7a40' : '#dc2626' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="rounded-xl p-3 text-center" style={{ background: '#122018', border: '1px solid #2d4a32' }}>
-            <div className="text-xs mb-1 leading-tight" style={{ color: '#4b7a56' }}>{label}</div>
+          <div key={label} className="rounded-xl p-3 text-center" style={{ background: '#e6eac8', border: '1px solid #b5c265' }}>
+            <div className="text-xs mb-1 leading-tight" style={{ color: '#5a6b20' }}>{label}</div>
             <div className="text-xs font-bold" style={{ color }}>{formatCurrency(Math.abs(value))}</div>
           </div>
         ))}
@@ -150,7 +150,7 @@ export default function ChartPage({ refreshKey }) {
       <div className="px-3 pt-3 pb-6">
         {loading ? (
           <div className="flex items-center justify-center h-52">
-            <div className="text-sm" style={{ color: '#4b7a56' }}>載入中...</div>
+            <div className="text-sm" style={{ color: '#5a6b20' }}>載入中...</div>
           </div>
         ) : (
           <ChartView data={data} chartType={chartType} period={period} />

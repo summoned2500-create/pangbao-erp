@@ -106,8 +106,8 @@ export default function QuickTextParser({ date, onAdded, onClose }) {
 
   return (
     <div className="space-y-3">
-      <div className="text-xs px-1" style={{ color: '#4b7a56' }}>
-        輸入格式範例：<span style={{ color: '#86efac' }}>門市現金 3500, LINE Pay 1800, Uber 2400, 豬肉 1500, 瓦斯 850</span>
+      <div className="text-xs px-1" style={{ color: '#5a6b20' }}>
+        輸入格式範例：<span style={{ color: '#2a7a40' }}>門市現金 3500, LINE Pay 1800, Uber 2400, 豬肉 1500, 瓦斯 850</span>
       </div>
 
       <textarea
@@ -116,15 +116,15 @@ export default function QuickTextParser({ date, onAdded, onClose }) {
         value={text}
         onChange={(e) => { setText(e.target.value); setPreview(null); setDone(false) }}
         className="w-full rounded-lg px-3 py-2.5 text-sm outline-none resize-none"
-        style={{ background: '#1a2e1f', border: '1px solid #2d4a32', color: '#e2f5e8' }}
-        onFocus={(e) => e.target.style.borderColor = '#4ade80'}
-        onBlur={(e) => e.target.style.borderColor = '#2d4a32'}
+        style={{ background: '#ffffff', border: '1px solid #b5c265', color: '#1e2e08' }}
+        onFocus={(e) => e.target.style.borderColor = '#16a34a'}
+        onBlur={(e) => e.target.style.borderColor = '#b5c265'}
       />
 
       {!preview && (
         <button onClick={handleParse} disabled={!text.trim()}
           className="w-full py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95"
-          style={{ background: text.trim() ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : '#2d4a32', color: '#0a1a0f' }}>
+          style={{ background: text.trim() ? 'linear-gradient(135deg,#d97706,#b45309)' : '#b5c265', color: '#f4f6e4' }}>
           ⚡ 解析
         </button>
       )}
@@ -133,21 +133,21 @@ export default function QuickTextParser({ date, onAdded, onClose }) {
 
       {preview && (
         <div className="space-y-2">
-          <div className="text-xs font-semibold px-1" style={{ color: '#86efac' }}>解析結果（共 {preview.length} 筆）</div>
-          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #2d4a32' }}>
+          <div className="text-xs font-semibold px-1" style={{ color: '#2a7a40' }}>解析結果（共 {preview.length} 筆）</div>
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #b5c265' }}>
             {preview.map((item, i) => (
               <div key={i} className="flex items-center justify-between px-3 py-2"
-                style={{ borderBottom: i < preview.length-1 ? '1px solid #1a2e1f' : 'none', background: '#122018' }}>
+                style={{ borderBottom: i < preview.length-1 ? '1px solid #ffffff' : 'none', background: '#e6eac8' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-xs px-1.5 py-0.5 rounded" style={{
-                    background: item.type === 'revenue' ? '#4ade8022' : '#fca5a522',
-                    color: item.type === 'revenue' ? '#4ade80' : '#fca5a5',
+                    background: item.type === 'revenue' ? '#16a34a22' : '#ef444422',
+                    color: item.type === 'revenue' ? '#16a34a' : '#ef4444',
                   }}>
                     {item.type === 'revenue' ? '營' : '成'}
                   </span>
-                  <span className="text-sm" style={{ color: '#e2f5e8' }}>{item.category}</span>
+                  <span className="text-sm" style={{ color: '#1e2e08' }}>{item.category}</span>
                 </div>
-                <span className="text-sm font-semibold" style={{ color: item.type === 'revenue' ? '#4ade80' : '#fca5a5' }}>
+                <span className="text-sm font-semibold" style={{ color: item.type === 'revenue' ? '#16a34a' : '#ef4444' }}>
                   NT${item.amount.toLocaleString('zh-TW')}
                 </span>
               </div>
@@ -157,12 +157,12 @@ export default function QuickTextParser({ date, onAdded, onClose }) {
           <div className="flex gap-2">
             <button onClick={() => setPreview(null)}
               className="flex-1 py-2.5 rounded-lg font-semibold text-sm"
-              style={{ background: '#1a2e1f', color: '#86efac', border: '1px solid #2d4a32' }}>
+              style={{ background: '#ffffff', color: '#2a7a40', border: '1px solid #b5c265' }}>
               重新輸入
             </button>
             <button onClick={handleSave} disabled={loading}
               className="flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95"
-              style={{ background: loading ? '#2d4a32' : 'linear-gradient(135deg,#4ade80,#22c55e)', color: '#0a1a0f' }}>
+              style={{ background: loading ? '#b5c265' : 'linear-gradient(135deg,#16a34a,#15803d)', color: '#f4f6e4' }}>
               {loading ? '儲存中...' : '✓ 確認儲存'}
             </button>
           </div>
@@ -170,7 +170,7 @@ export default function QuickTextParser({ date, onAdded, onClose }) {
       )}
 
       {done && (
-        <div className="text-center text-sm py-2" style={{ color: '#4ade80' }}>✓ 全部儲存成功！</div>
+        <div className="text-center text-sm py-2" style={{ color: '#16a34a' }}>✓ 全部儲存成功！</div>
       )}
     </div>
   )

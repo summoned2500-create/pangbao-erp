@@ -17,7 +17,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col" style={{ background: '#0a1a0f' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: '#f4f6e4' }}>
         <div className="flex-1 overflow-auto pb-20">
           <Routes>
             <Route path="/" element={<Navigate to="/calendar" replace />} />
