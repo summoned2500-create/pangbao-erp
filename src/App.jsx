@@ -6,6 +6,7 @@ import Navbar from './shared/components/Navbar.jsx'
 import CalendarPage from './features/calendar/CalendarPage.jsx'
 import AccountPage from './features/account/AccountPage.jsx'
 import ChartPage from './features/chart/ChartPage.jsx'
+import InventoryPage from './features/inventory/InventoryPage.jsx'
 import QuickAddModal from './features/transaction/QuickAddModal.jsx'
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/calendar" element={<CalendarPage refreshKey={refreshKey} />} />
             <Route path="/account" element={<AccountPage refreshKey={refreshKey} />} />
             <Route path="/chart" element={<ChartPage refreshKey={refreshKey} />} />
+            <Route path="/inventory" element={<InventoryPage />} />
           </Routes>
         </div>
         <Navbar onQuickAdd={() => setQuickAddOpen(true)} />

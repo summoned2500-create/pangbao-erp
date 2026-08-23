@@ -22,6 +22,12 @@ const ChartIcon = () => (
     <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
   </svg>
 )
+const BoxIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+  </svg>
+)
 
 export default function Navbar({ onQuickAdd }) {
   const location = useLocation()
@@ -30,6 +36,7 @@ export default function Navbar({ onQuickAdd }) {
     { to: '/calendar', label: '記帳', Icon: CalIcon },
     { to: '/account', label: '帳戶', Icon: ListIcon },
     { to: '/chart', label: '圖表', Icon: ChartIcon },
+    { to: '/inventory', label: '庫存', Icon: BoxIcon },
   ]
 
   return (
