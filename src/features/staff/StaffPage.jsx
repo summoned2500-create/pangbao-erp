@@ -257,6 +257,7 @@ function LeaveTab({ employees }) {
   }
 
   const handleDelete = async (id) => {
+    if (!window.confirm('確定要刪除這筆請假紀錄嗎？')) return
     await supabase.from('leaves').delete().eq('id', id)
     fetchLeaves()
   }
