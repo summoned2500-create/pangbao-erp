@@ -1,18 +1,25 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Navbar from './components/Navbar.jsx'
-import CalendarPage from './pages/CalendarPage.jsx'
-import AccountPage from './pages/AccountPage.jsx'
-import ChartPage from './pages/ChartPage.jsx'
-import QuickAddModal from './components/QuickAddModal.jsx'
+import { isAuthed } from './features/auth/auth.js'
+import LoginPage from './features/auth/LoginPage.jsx'
+import Navbar from './shared/components/Navbar.jsx'
+import CalendarPage from './features/calendar/CalendarPage.jsx'
+import AccountPage from './features/account/AccountPage.jsx'
+import ChartPage from './features/chart/ChartPage.jsx'
+import QuickAddModal from './features/transaction/QuickAddModal.jsx'
 
 export default function App() {
+  const [authed, setAuthed] = useState(isAuthed())
   const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
 
   const handleAdded = () => {
     setRefreshKey((k) => k + 1)
     setQuickAddOpen(false)
+  }
+
+  if (!authed) {
+    return <LoginPage onLogin={() => setAuthed(true)} />
   }
 
   return (

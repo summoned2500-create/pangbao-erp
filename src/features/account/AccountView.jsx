@@ -1,6 +1,6 @@
 import React from 'react'
 import { format } from 'date-fns'
-import { formatCurrency, getCostCategory, getRevenueChannel } from '../theme.js'
+import { formatCurrency, getCostCategory, getRevenueChannel } from '../../shared/theme.js'
 
 export default function AccountView({ entries, onDelete, loading }) {
   if (loading) {

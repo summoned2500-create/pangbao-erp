@@ -1,7 +1,7 @@
 import React from 'react'
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, isToday, format } from 'date-fns'
 import { zhTW } from 'date-fns/locale'
-import { formatCurrency } from '../theme.js'
+import { formatCurrency } from '../../shared/theme.js'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 

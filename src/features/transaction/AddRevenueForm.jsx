@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { insertTransaction } from '../supabase.js'
-import { ICHEF_CHANNELS, DELIVERY_CHANNELS } from '../theme.js'
+import { insertTransaction } from '../../shared/lib/supabase.js'
+import { ICHEF_CHANNELS, DELIVERY_CHANNELS } from '../../shared/theme.js'
 import { format } from 'date-fns'
 
 const UBER_COMMISSION = 0.35

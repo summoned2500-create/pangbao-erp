@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
-import { supabase, deleteTransaction } from '../supabase.js'
-import { formatCurrency, getCostCategory, getRevenueChannel } from '../theme.js'
+import { supabase, deleteTransaction } from '../../shared/lib/supabase.js'
+import { formatCurrency, getCostCategory, getRevenueChannel } from '../../shared/theme.js'
 import AddCostForm from './AddCostForm.jsx'
 import AddRevenueForm from './AddRevenueForm.jsx'
 

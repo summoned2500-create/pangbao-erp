@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { insertTransaction } from '../supabase.js'
-import { COST_CATEGORIES } from '../theme.js'
+import { insertTransaction } from '../../shared/lib/supabase.js'
+import { COST_CATEGORIES } from '../../shared/theme.js'
 import { format } from 'date-fns'
 
 export default function AddCostForm({ date, onAdded, compact = false }) {
