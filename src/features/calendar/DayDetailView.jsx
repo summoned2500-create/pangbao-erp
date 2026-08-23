@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 import { supabase, deleteTransaction } from '../../shared/lib/supabase.js'
 import { formatCurrency, getCostCategory, getRevenueChannel } from '../../shared/theme.js'
-import AddCostForm from './AddCostForm.jsx'
-import AddRevenueForm from './AddRevenueForm.jsx'
+import AddCostForm from '../transaction/AddCostForm.jsx'
+import AddRevenueForm from '../transaction/AddRevenueForm.jsx'
 
 export default function DayDetailView({ date, onClose, onDataChanged }) {
   const [tab, setTab] = useState('summary')
