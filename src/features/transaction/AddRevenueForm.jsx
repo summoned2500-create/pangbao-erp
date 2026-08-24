@@ -8,6 +8,7 @@ const UBER_COMMISSION = 0.35
 export default function AddRevenueForm({ date, onAdded, compact = false }) {
   const [channel, setChannel] = useState(ICHEF_CHANNELS[0].value)
   const [amount, setAmount] = useState('')
+  const [customerCount, setCustomerCount] = useState('')
   const [note, setNote] = useState('')
   const [uberDeduct, setUberDeduct] = useState(true)
   const [loading, setLoading] = useState(false)
@@ -41,9 +42,11 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
         type: 'revenue',
         category: channel,
         amount: netAmount,
+        customer_count: Number(customerCount) || 0,
         note: finalNote,
       })
       setAmount('')
+      setCustomerCount('')
       setNote('')
       onAdded && onAdded()
     } catch (err) {
@@ -144,6 +147,18 @@ export default function AddRevenueForm({ date, onAdded, compact = false }) {
           )}
         </div>
       )}
+
+      {/* 來客數 */}
+      <div>
+        <label className="block text-xs mb-1" style={{ color: '#2a7a40' }}>來客數（選填）</label>
+        <input type="number" step="1" min="0" placeholder="0"
+          value={customerCount} onChange={(e) => setCustomerCount(e.target.value)}
+          className="w-full rounded-lg px-3 py-2.5 text-sm outline-none"
+          style={{ background: '#ffffff', border: '1px solid #b5c265', color: '#1e2e08' }}
+          onFocus={(e) => e.target.style.borderColor = '#16a34a'}
+          onBlur={(e) => e.target.style.borderColor = '#b5c265'}
+        />
+      </div>
 
       {/* 備註 */}
       <div>
