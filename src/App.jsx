@@ -8,6 +8,7 @@ import AccountPage from './features/account/AccountPage.jsx'
 import ChartPage from './features/chart/ChartPage.jsx'
 import InventoryPage from './features/inventory/InventoryPage.jsx'
 import StaffPage from './features/staff/StaffPage.jsx'
+import GoalPage from './features/goal/GoalPage.jsx'
 import QuickAddModal from './features/transaction/QuickAddModal.jsx'
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/chart" element={<ChartPage refreshKey={refreshKey} />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/staff" element={<StaffPage />} />
+            <Route path="/goal" element={<GoalPage />} />
           </Routes>
         </div>
         <Navbar onQuickAdd={() => setQuickAddOpen(true)} />

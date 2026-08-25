@@ -35,6 +35,11 @@ const BoxIcon = () => (
     <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
   </svg>
 )
+const TargetIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+  </svg>
+)
 
 export default function Navbar({ onQuickAdd }) {
   const location = useLocation()
@@ -42,7 +47,7 @@ export default function Navbar({ onQuickAdd }) {
   const navItems = [
     { to: '/calendar', label: '記帳', Icon: CalIcon },
     { to: '/account', label: '帳戶', Icon: ListIcon },
-    { to: '/chart', label: '圖表', Icon: ChartIcon },
+    { to: '/goal', label: '目標', Icon: TargetIcon },
     { to: '/inventory', label: '庫存', Icon: BoxIcon },
     { to: '/staff', label: '員工', Icon: PeopleIcon },
   ]
