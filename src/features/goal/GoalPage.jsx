@@ -91,6 +91,7 @@ export default function GoalPage() {
   const [editCost, setEditCost] = useState('')
   const [saving, setSaving] = useState(false)
   const [history, setHistory] = useState([])
+  const [prediction, setPrediction] = useState(null)
 
   const year = month.getFullYear()
   const mon = month.getMonth() + 1
@@ -130,7 +131,26 @@ export default function GoalPage() {
       })
     })
     const results = await Promise.all(promises)
-    setHistory(results.filter(r => r.revenue > 0 || r.target))
+    const filtered = results.filter(r => r.revenue > 0 || r.target)
+    setHistory(filtered)
+
+    // 用過去 3 個月有資料的月份計算預測
+    const withData = results.filter(r => r.revenue > 0).slice(0, 3)
+    if (withData.length >= 2) {
+      const avgRev = withData.reduce((s, r) => s + r.revenue, 0) / withData.length
+      const avgCost = withData.reduce((s, r) => s + r.cost, 0) / withData.length
+      // 計算趨勢：最近月 vs 前幾月均值
+      const trend = withData.length >= 2
+        ? (withData[0].revenue - withData[withData.length - 1].revenue) / withData[withData.length - 1].revenue
+        : 0
+      const trendAdj = Math.max(-0.1, Math.min(0.15, trend)) // 限制在 -10% ~ +15%
+      setPrediction({
+        revenue: Math.round(avgRev * (1 + trendAdj / 2)),
+        cost: Math.round(avgCost),
+        months: withData.map(r => `${r.year}/${String(r.month).padStart(2,'0')}`),
+        trend: trendAdj,
+      })
+    }
   }, [])
 
   useEffect(() => { fetchData() }, [fetchData])
@@ -185,6 +205,22 @@ export default function GoalPage() {
             <span className="text-sm font-bold" style={{ color: '#1e2e08' }}>設定 {monthLabel} 目標</span>
             <button type="button" onClick={() => setEditing(false)} style={{ color: '#9ca3af' }}>✕</button>
           </div>
+          {prediction && (
+            <div className="rounded-xl p-3 space-y-1" style={{ background: '#f4f6e4', border: '1px solid #b5c265' }}>
+              <div className="text-xs font-semibold" style={{ color: '#2a7a40' }}>
+                🤖 AI 預測（根據 {prediction.months.join('、')}）
+              </div>
+              <div className="text-xs" style={{ color: '#5a6b20' }}>
+                趨勢：{prediction.trend > 0 ? `📈 成長 ${Math.round(prediction.trend * 100)}%` : prediction.trend < 0 ? `📉 下降 ${Math.round(Math.abs(prediction.trend) * 100)}%` : '➡️ 持平'}
+              </div>
+              <button type="button"
+                onClick={() => { setEditRevenue(prediction.revenue); setEditCost(prediction.cost) }}
+                className="w-full py-1.5 rounded-lg text-xs font-semibold mt-1"
+                style={{ background: '#16a34a', color: '#fff' }}>
+                套用建議目標（營收 {formatCurrency(prediction.revenue)} / 成本 {formatCurrency(prediction.cost)}）
+              </button>
+            </div>
+          )}
           <div>
             <label className="text-xs mb-1 block" style={{ color: '#5a6b20' }}>預估營收（NT$）</label>
             <input type="number" required placeholder="0" value={editRevenue} onChange={e => setEditRevenue(e.target.value)}
