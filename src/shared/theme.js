@@ -18,7 +18,7 @@ export const ICHEF_CHANNELS = [
 
 // 外送營收
 export const DELIVERY_CHANNELS = [
-  { value: 'Uber Eats 外送', label: 'Uber Eats', color: '#d97706', icon: '🛵', commission: 0.32 },
+  { value: 'Uber Eats 外送', label: 'Uber Eats', color: '#d97706', icon: '🛵', commission: 0.35 },
 ]
 
 // 全部營收管道（供顯示用）

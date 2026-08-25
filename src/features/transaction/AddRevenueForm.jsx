@@ -3,7 +3,7 @@ import { insertTransaction } from '../../shared/lib/supabase.js'
 import { ICHEF_CHANNELS, DELIVERY_CHANNELS } from '../../shared/theme.js'
 import { format } from 'date-fns'
 
-const UBER_COMMISSION = 0.35
+const UBER_COMMISSION = DELIVERY_CHANNELS[0]?.commission || 0.35
 
 export default function AddRevenueForm({ date, onAdded, compact = false }) {
   const [channel, setChannel] = useState(ICHEF_CHANNELS[0].value)
