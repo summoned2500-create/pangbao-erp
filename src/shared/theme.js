@@ -4,6 +4,7 @@ export const COST_CATEGORIES = [
   { value: '蔬菜', label: '蔬菜', color: '#6ee7b7', icon: '🥬' },
   { value: '桶裝瓦斯', label: '桶裝瓦斯', color: '#d97706', icon: '🔥' },
   { value: '紙類雜項', label: '紙類雜項', color: '#a5b4fc', icon: '📦' },
+  { value: '關東煮料', label: '關東煮料', color: '#f97316', icon: '🍢' },
   { value: '薪資', label: '薪資', color: '#7c3aed', icon: '👷' },
   { value: '房租', label: '房租', color: '#0369a1', icon: '🏠' },
   { value: '水費', label: '水費', color: '#0891b2', icon: '💧' },
