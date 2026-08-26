@@ -4,6 +4,11 @@ export const COST_CATEGORIES = [
   { value: '蔬菜', label: '蔬菜', color: '#6ee7b7', icon: '🥬' },
   { value: '桶裝瓦斯', label: '桶裝瓦斯', color: '#d97706', icon: '🔥' },
   { value: '紙類雜項', label: '紙類雜項', color: '#a5b4fc', icon: '📦' },
+  { value: '薪資', label: '薪資', color: '#7c3aed', icon: '👷' },
+  { value: '房租', label: '房租', color: '#0369a1', icon: '🏠' },
+  { value: '水費', label: '水費', color: '#0891b2', icon: '💧' },
+  { value: '電費', label: '電費', color: '#ca8a04', icon: '⚡' },
+  { value: '稅金', label: '稅金', color: '#dc2626', icon: '🧾' },
 ]
 
 // 門市營收 (iCHEF POS 管道)
