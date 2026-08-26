@@ -44,7 +44,7 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col" style={{ background: '#f4f6e4' }}>
+    <div className="fixed inset-0 z-40 flex flex-col" style={{ background: '#f4f6e4', height: '100dvh' }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3" style={{ background: '#e6eac8', borderBottom: '1px solid #b5c265' }}>
         <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-full"
@@ -94,7 +94,7 @@ export default function DayDetailView({ date, onClose, onDataChanged }) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3 pb-36">
+      <div className="flex-1 overflow-y-scroll p-3 pb-36" style={{ WebkitOverflowScrolling: 'touch' }}>
         {loading ? (
           <div className="flex items-center justify-center h-32">
             <div className="text-sm" style={{ color: '#5a6b20' }}>載入中...</div>
