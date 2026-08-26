@@ -1,6 +1,7 @@
 export const COST_CATEGORIES = [
   { value: '餃子皮', label: '餃子皮', color: '#2a7a40', icon: '🥟' },
   { value: '豬肉', label: '豬肉', color: '#ef4444', icon: '🥩' },
+  { value: '雞肉類', label: '雞肉類', color: '#f59e0b', icon: '🍗' },
   { value: '蔬菜', label: '蔬菜', color: '#6ee7b7', icon: '🥬' },
   { value: '桶裝瓦斯', label: '桶裝瓦斯', color: '#d97706', icon: '🔥' },
   { value: '紙類雜項', label: '紙類雜項', color: '#a5b4fc', icon: '📦' },
@@ -10,6 +11,7 @@ export const COST_CATEGORIES = [
   { value: '水費', label: '水費', color: '#0891b2', icon: '💧' },
   { value: '電費', label: '電費', color: '#ca8a04', icon: '⚡' },
   { value: '稅金', label: '稅金', color: '#dc2626', icon: '🧾' },
+  { value: '電信費', label: '電信費', color: '#6366f1', icon: '📡' },
 ]
 
 // 門市營收 (iCHEF POS 管道)
