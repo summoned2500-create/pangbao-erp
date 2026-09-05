@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../../shared/lib/supabase.js'
 import { COST_CATEGORIES, formatCurrency } from '../../shared/theme.js'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
 
 // ── 成本/毛利色彩判斷 ──────────────────────────────────────────
 const marginColor = (pct) => {
