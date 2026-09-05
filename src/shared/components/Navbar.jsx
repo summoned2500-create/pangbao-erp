@@ -46,10 +46,12 @@ export default function Navbar({ onQuickAdd }) {
   const navigate = useNavigate()
   const [fabOpen, setFabOpen] = useState(false)
 
-  const navItems = [
+  const leftItems = [
     { to: '/calendar', label: '記帳', Icon: CalIcon },
     { to: '/account', label: '帳戶', Icon: ListIcon },
     { to: '/goal', label: '目標', Icon: TargetIcon },
+  ]
+  const rightItems = [
     { to: '/inventory', label: '庫存', Icon: BoxIcon },
     { to: '/cost', label: '成本', Icon: CostIcon },
   ]
@@ -98,7 +100,9 @@ export default function Navbar({ onQuickAdd }) {
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 pb-safe"
         style={{ background: '#e6eac8', borderTop: '1px solid #b5c265', height: '64px' }}>
-        {navItems.map(({ to, label, Icon }) => {
+
+        {/* 左側：記帳、帳戶、目標 */}
+        {leftItems.map(({ to, label, Icon }) => {
           const active = location.pathname.startsWith(to)
           return (
             <NavLink key={to} to={to}
@@ -110,7 +114,7 @@ export default function Navbar({ onQuickAdd }) {
           )
         })}
 
-        {/* FAB 按鈕 */}
+        {/* 中央 FAB */}
         <button onClick={handleFabClick}
           className="flex flex-col items-center justify-center flex-1 py-1 gap-0.5 rounded-xl transition-all active:scale-95">
           <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
@@ -129,6 +133,19 @@ export default function Navbar({ onQuickAdd }) {
           </div>
           <span className="text-xs font-medium" style={{ color: '#5a6b20' }}>{fabOpen ? '關閉' : '新增'}</span>
         </button>
+
+        {/* 右側：庫存、成本 */}
+        {rightItems.map(({ to, label, Icon }) => {
+          const active = location.pathname.startsWith(to)
+          return (
+            <NavLink key={to} to={to}
+              className="flex flex-col items-center justify-center flex-1 py-1 gap-0.5 rounded-xl transition-colors"
+              style={{ color: active ? '#16a34a' : '#5a6b20' }}>
+              <Icon />
+              <span className="text-xs font-medium">{label}</span>
+            </NavLink>
+          )
+        })}
       </nav>
     </>
   )

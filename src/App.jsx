@@ -38,7 +38,7 @@ export default function App() {
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/staff" element={<StaffPage />} />
             <Route path="/goal" element={<GoalPage />} />
-            <Route path="/cost" element={<CostPage />} />
+            <Route path="/cost" element={<CostPage refreshKey={refreshKey} />} />
           </Routes>
         </div>
         <Navbar onQuickAdd={() => setQuickAddOpen(true)} />

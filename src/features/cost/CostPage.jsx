@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { supabase } from '../../shared/lib/supabase.js'
+import { supabase, fetchTransactionsByMonth } from '../../shared/lib/supabase.js'
 import { COST_CATEGORIES, formatCurrency } from '../../shared/theme.js'
 
 // ── 成本/毛利色彩判斷 ──────────────────────────────────────────
@@ -83,18 +83,36 @@ function IngredientsTab() {
   }
 
   const handlePurchase = async (e) => {
-    e.preventDefault()
-    setSaving(true)
-    await supabase.from('ingredient_purchases').insert({
-      ingredient_id: purchaseId,
-      date: purchaseForm.date,
-      quantity: parseFloat(purchaseForm.quantity),
-      unit_price: parseFloat(purchaseForm.unit_price),
-    })
-    setPurchaseId(null)
-    setPurchaseForm({ date: new Date().toISOString().slice(0, 10), quantity: '', unit_price: '' })
-    setSaving(false)
-    load()
+    e.preventDefault(); setSaving(true)
+    try {
+      const qty = parseFloat(purchaseForm.quantity) || 0
+      const unitPrice = parseFloat(purchaseForm.unit_price) || 0
+
+      // 1. 新增進貨紀錄
+      await supabase.from('ingredient_purchases').insert({
+        ingredient_id: purchaseId,
+        date: purchaseForm.date,
+        quantity: qty,
+        unit_price: unitPrice,
+        total_amount: qty * unitPrice,
+      })
+
+      // 2. 同步更新食材最新進貨價、日期與當前單價
+      await supabase.from('ingredients').update({
+        last_purchase_price: unitPrice,
+        last_purchase_date: purchaseForm.date,
+        price_per_unit: unitPrice, // 確保 BOM 配方能即時反映最新進貨成本
+      }).eq('id', purchaseId)
+
+      setPurchaseId(null)
+      setPurchaseForm({ date: new Date().toISOString().slice(0, 10), quantity: '', unit_price: '' })
+      load()
+    } catch (err) {
+      console.error('進貨記錄失敗：', err)
+      alert('進貨記錄失敗，請檢查網路或輸入內容')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleDelete = async (id) => {
@@ -261,12 +279,16 @@ function ProductsTab({ dailyUnits, setDailyUnits }) {
 
   const handleAddBom = async (e) => {
     e.preventDefault()
-    if (!bomForm.ingredient_id) return
+    const qty = parseFloat(bomForm.quantity_per_unit)
+    if (!bomForm.ingredient_id || isNaN(qty) || qty <= 0) {
+      alert('請選擇食材並輸入大於 0 的每顆用量')
+      return
+    }
     setSaving(true)
     await supabase.from('product_ingredients').upsert({
       product_id: selectedProduct.id,
       ingredient_id: bomForm.ingredient_id,
-      quantity_per_unit: parseFloat(bomForm.quantity_per_unit),
+      quantity_per_unit: qty,
     }, { onConflict: 'product_id,ingredient_id' })
     setBomForm({ ingredient_id: '', quantity_per_unit: '' })
     setSaving(false)
@@ -418,6 +440,9 @@ function ProductsTab({ dailyUnits, setDailyUnits }) {
                       value={bomForm.quantity_per_unit}
                       onChange={e => setBomForm(f => ({ ...f, quantity_per_unit: e.target.value }))}
                       style={{ width: '80px', ...inputStyle, border: '1px solid #b5c265', borderRadius: '0.4rem', padding: '0.25rem 0.4rem', fontSize: '0.75rem', background: '#f4f6e4' }} />
+                    <span className="text-xs text-green-700">
+                      {ingredients.find(i => i.id === bomForm.ingredient_id)?.unit || ''}/顆
+                    </span>
                     <button type="submit" style={{ ...btnPrimary, fontSize: '0.75rem', padding: '0.25rem 0.6rem' }} disabled={saving}>加入</button>
                   </form>
 
@@ -446,14 +471,7 @@ function ReportTab({ dailyUnits }) {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const from = `${year}-${String(month).padStart(2, '0')}-01`
-    const toDate = new Date(year, month, 0)
-    const to = `${year}-${String(month).padStart(2, '0')}-${String(toDate.getDate()).padStart(2, '0')}`
-    const { data: txns } = await supabase
-      .from('transactions')
-      .select('type,category,amount')
-      .gte('date', from)
-      .lte('date', to)
+    const txns = await fetchTransactionsByMonth(year, month)
     setData(txns || [])
     setLoading(false)
   }, [year, month])
@@ -567,7 +585,7 @@ const TABS = [
   { key: 'report', label: '📊 成本報表' },
 ]
 
-export default function CostPage() {
+export default function CostPage({ refreshKey }) {
   const [tab, setTab] = useState('ingredients')
   const [dailyUnits, setDailyUnits] = useState(() => {
     const v = localStorage.getItem('pangbao_daily_units')
