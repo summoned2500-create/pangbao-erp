@@ -5,7 +5,6 @@ import LoginPage from './features/auth/LoginPage.jsx'
 import Navbar from './shared/components/Navbar.jsx'
 import CalendarPage from './features/calendar/CalendarPage.jsx'
 import AccountPage from './features/account/AccountPage.jsx'
-import ChartPage from './features/chart/ChartPage.jsx'
 import InventoryPage from './features/inventory/InventoryPage.jsx'
 import StaffPage from './features/staff/StaffPage.jsx'
 import GoalPage from './features/goal/GoalPage.jsx'
@@ -34,7 +33,6 @@ export default function App() {
             <Route path="/" element={<Navigate to="/calendar" replace />} />
             <Route path="/calendar" element={<CalendarPage refreshKey={refreshKey} />} />
             <Route path="/account" element={<AccountPage refreshKey={refreshKey} />} />
-            <Route path="/chart" element={<ChartPage refreshKey={refreshKey} />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/staff" element={<StaffPage />} />
             <Route path="/goal" element={<GoalPage />} />

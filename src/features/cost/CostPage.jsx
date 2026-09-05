@@ -36,6 +36,18 @@ const Card = ({ children, style }) => (
   </div>
 )
 
+// ── 依食材名稱猜測成本分類 ────────────────────────────────────
+const guessCategory = (name = '') => {
+  if (/皮/.test(name)) return '餃子皮'
+  if (/豬/.test(name)) return '豬肉'
+  if (/雞/.test(name)) return '雞肉類'
+  if (/菜|蔥|薑|蒜|韭|高麗|花椰|玉米/.test(name)) return '蔬菜'
+  if (/瓦斯/.test(name)) return '桶裝瓦斯'
+  if (/紙|袋|盒|叉/.test(name)) return '紙類雜項'
+  if (/關東煮|貢丸|魚板|甜不辣/.test(name)) return '關東煮料'
+  return '餃子皮'
+}
+
 // ── 食材管理 Tab ──────────────────────────────────────────────
 function IngredientsTab() {
   const [items, setItems] = useState([])
@@ -45,7 +57,7 @@ function IngredientsTab() {
   const [purchaseId, setPurchaseId] = useState(null)
   const [form, setForm] = useState({ name: '', unit: 'g', price_per_unit: '' })
   const [editPrice, setEditPrice] = useState('')
-  const [purchaseForm, setPurchaseForm] = useState({ date: new Date().toISOString().slice(0, 10), quantity: '', unit_price: '' })
+  const [purchaseForm, setPurchaseForm] = useState({ date: new Date().toISOString().slice(0, 10), quantity: '', unit_price: '', category: '餃子皮', syncToTx: true })
   const [saving, setSaving] = useState(false)
 
   const load = useCallback(async () => {
@@ -87,6 +99,8 @@ function IngredientsTab() {
     try {
       const qty = parseFloat(purchaseForm.quantity) || 0
       const unitPrice = parseFloat(purchaseForm.unit_price) || 0
+      const total = qty * unitPrice
+      const ingItem = items.find(i => i.id === purchaseId)
 
       // 1. 新增進貨紀錄
       await supabase.from('ingredient_purchases').insert({
@@ -94,18 +108,29 @@ function IngredientsTab() {
         date: purchaseForm.date,
         quantity: qty,
         unit_price: unitPrice,
-        total_amount: qty * unitPrice,
+        total_amount: total,
       })
 
       // 2. 同步更新食材最新進貨價、日期與當前單價
       await supabase.from('ingredients').update({
         last_purchase_price: unitPrice,
         last_purchase_date: purchaseForm.date,
-        price_per_unit: unitPrice, // 確保 BOM 配方能即時反映最新進貨成本
+        price_per_unit: unitPrice,
       }).eq('id', purchaseId)
 
+      // 3. 若勾選，同步新增一筆成本記帳
+      if (purchaseForm.syncToTx && total > 0) {
+        await supabase.from('transactions').insert({
+          type: 'cost',
+          category: purchaseForm.category,
+          amount: total,
+          date: purchaseForm.date,
+          note: `${ingItem?.name || ''} 進貨 ${qty}${ingItem?.unit || ''}`,
+        })
+      }
+
       setPurchaseId(null)
-      setPurchaseForm({ date: new Date().toISOString().slice(0, 10), quantity: '', unit_price: '' })
+      setPurchaseForm({ date: new Date().toISOString().slice(0, 10), quantity: '', unit_price: '', category: '餃子皮', syncToTx: true })
       load()
     } catch (err) {
       console.error('進貨記錄失敗：', err)
@@ -117,8 +142,13 @@ function IngredientsTab() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('確定刪除此食材？相關配方也會一併移除。')) return
-    await supabase.from('ingredients').delete().eq('id', id)
-    load()
+    try {
+      await supabase.from('ingredients').delete().eq('id', id)
+      load()
+    } catch (err) {
+      console.error('刪除食材失敗：', err)
+      alert('刪除失敗，請確認此食材未被其他資料引用')
+    }
   }
 
   const UNITS = ['g', 'kg', '顆', '張', '包', 'ml', 'L']
@@ -201,6 +231,15 @@ function IngredientsTab() {
                     value={purchaseForm.unit_price} className={inputCls} style={inputStyle}
                     onChange={e => setPurchaseForm(f => ({ ...f, unit_price: e.target.value }))} required />
                 </div>
+                <select value={purchaseForm.category} className={inputCls} style={inputStyle}
+                  onChange={e => setPurchaseForm(f => ({ ...f, category: e.target.value }))}>
+                  {COST_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
+                </select>
+                <label className="flex items-center gap-2 text-xs text-green-800">
+                  <input type="checkbox" checked={purchaseForm.syncToTx}
+                    onChange={e => setPurchaseForm(f => ({ ...f, syncToTx: e.target.checked }))} />
+                  同步新增一筆成本記帳
+                </label>
                 <div className="flex gap-2">
                   <button type="submit" style={btnPrimary} disabled={saving}>{saving ? '儲存…' : '確認進貨'}</button>
                   <button type="button" style={btnSecondary} onClick={() => setPurchaseId(null)}>取消</button>
@@ -209,7 +248,7 @@ function IngredientsTab() {
             ) : (
               <div className="flex gap-2 mt-2">
                 <button style={{ ...btnSecondary, fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
-                  onClick={() => setPurchaseId(item.id)}>📥 記錄進貨</button>
+                  onClick={() => { setPurchaseId(item.id); setPurchaseForm(f => ({ ...f, category: guessCategory(item.name) })) }}>📥 記錄進貨</button>
                 <button style={{ ...btnDanger, fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
                   onClick={() => handleDelete(item.id)}>🗑</button>
               </div>
@@ -306,9 +345,14 @@ function ProductsTab({ dailyUnits, setDailyUnits }) {
 
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('確定刪除此產品？')) return
-    await supabase.from('products').delete().eq('id', id)
-    if (selectedProduct?.id === id) setSelectedProduct(null)
-    load()
+    try {
+      await supabase.from('products').delete().eq('id', id)
+      if (selectedProduct?.id === id) setSelectedProduct(null)
+      load()
+    } catch (err) {
+      console.error('刪除產品失敗：', err)
+      alert('刪除失敗，請再試一次')
+    }
   }
 
   const calcCost = (bom) => {
@@ -566,6 +610,25 @@ function ReportTab({ dailyUnits }) {
                 })}
               </div>
               <div className="text-right text-xs text-green-700 mt-2">總成本：{formatCurrency(totalCost)}</div>
+            </Card>
+          )}
+
+          {/* 每顆分攤管銷 */}
+          {dailyUnits > 0 && totalCost > 0 && (
+            <Card>
+              <div className="text-sm font-semibold text-green-800 mb-2">每顆成本分攤（參考）</div>
+              <div className="text-xs text-green-700 space-y-1">
+                <div className="flex justify-between">
+                  <span>每日產量設定</span><span>{dailyUnits} 顆</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>本月總成本</span><span>{formatCurrency(totalCost)}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-green-900 border-t border-green-200 pt-1">
+                  <span>管銷分攤/顆（約）</span>
+                  <span>NT${(totalCost / (dailyUnits * new Date(year, month, 0).getDate())).toFixed(2)}</span>
+                </div>
+              </div>
             </Card>
           )}
 
