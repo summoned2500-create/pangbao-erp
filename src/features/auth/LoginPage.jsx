@@ -19,7 +19,7 @@ export default function LoginPage({ onLogin }) {
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#f4f6e4' }}>
       <div className="w-full max-w-sm mx-4 rounded-2xl p-8 shadow-lg" style={{ background: '#ffffff', border: '1px solid #b5c265' }}>
         <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🥟</div>
+          <img src="/logo.png" alt="胖寶餃子" className="mx-auto mb-3" style={{ width: '120px', height: '120px', objectFit: 'contain' }} />
           <h1 className="text-2xl font-bold" style={{ color: '#1e2e08' }}>胖寶 ERP</h1>
           <p className="text-sm mt-1" style={{ color: '#5a6b20' }}>請輸入密碼以繼續</p>
         </div>
