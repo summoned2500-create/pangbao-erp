@@ -74,6 +74,11 @@ export default function Navbar({ onQuickAdd }) {
     navigate('/staff')
   }
 
+  const handleMarketing = () => {
+    setFabOpen(false)
+    navigate('/marketing')
+  }
+
   return (
     <>
       {/* FAB 展開遮罩 */}
@@ -85,6 +90,11 @@ export default function Navbar({ onQuickAdd }) {
       {fabOpen && (
         <div className="fixed z-50 flex flex-col gap-2 items-center"
           style={{ bottom: '80px', left: '50%', transform: 'translateX(-50%)' }}>
+          <button onClick={handleMarketing}
+            className="flex items-center gap-2 px-4 py-2 rounded-full shadow-lg text-sm font-semibold active:scale-95 transition-all"
+            style={{ background: '#e6eac8', border: '1px solid #b5c265', color: '#2a7a40' }}>
+            📣 行銷排程
+          </button>
           <button onClick={handleStaff}
             className="flex items-center gap-2 px-4 py-2 rounded-full shadow-lg text-sm font-semibold active:scale-95 transition-all"
             style={{ background: '#e6eac8', border: '1px solid #b5c265', color: '#2a7a40' }}>
