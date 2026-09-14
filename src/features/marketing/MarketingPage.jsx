@@ -50,12 +50,26 @@ const defaultForm = () => ({
   status: 'draft',
 })
 
+async function uploadMarketingImage(file) {
+  const ext = file.name.split('.').pop()
+  const fileName = `${Date.now()}.${ext}`
+  const { data, error } = await supabase.storage
+    .from('marketing-images')
+    .upload(fileName, file, { upsert: false })
+  if (error) throw error
+  const { data: urlData } = supabase.storage
+    .from('marketing-images')
+    .getPublicUrl(data.path)
+  return urlData.publicUrl
+}
+
 export default function MarketingPage() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [form, setForm] = useState(defaultForm())
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [filter, setFilter] = useState('all') // all | draft | ready | published | failed
 
   const load = useCallback(async () => {
@@ -178,10 +192,48 @@ export default function MarketingPage() {
                 placeholder="文案內容（必填）"
                 value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} required />
 
-              {/* 圖片網址 */}
-              <input className={inputCls} style={inputStyle}
-                placeholder="圖片 HTTPS URL（IG 必填，需公開可直連）"
-                value={form.media_url} onChange={e => setForm(f => ({ ...f, media_url: e.target.value }))} />
+              {/* 圖片上傳 */}
+              <div>
+                <div className="text-xs text-green-700 mb-1">圖片（選填）</div>
+                <div className="flex gap-2 items-center flex-wrap">
+                  <label style={{
+                    ...btnSecondary, fontSize: '0.8rem', padding: '0.35rem 0.8rem',
+                    cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.6 : 1,
+                    display: 'inline-block',
+                  }}>
+                    {uploading ? '上傳中…' : '📷 選擇照片'}
+                    <input type="file" accept="image/*" style={{ display: 'none' }}
+                      disabled={uploading}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        setUploading(true)
+                        try {
+                          const url = await uploadMarketingImage(file)
+                          setForm(f => ({ ...f, media_url: url }))
+                        } catch (err) {
+                          alert('上傳失敗：' + err.message)
+                        } finally {
+                          setUploading(false)
+                          e.target.value = ''
+                        }
+                      }} />
+                  </label>
+                  {form.media_url && (
+                    <div className="flex items-center gap-1 flex-1 min-w-0">
+                      <img src={form.media_url} alt="預覽"
+                        style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #b5c265', flexShrink: 0 }} />
+                      <button type="button" onClick={() => setForm(f => ({ ...f, media_url: '' }))}
+                        style={{ color: '#dc2626', fontSize: '0.75rem', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>✕ 移除</button>
+                    </div>
+                  )}
+                </div>
+                {!form.media_url && (
+                  <input className={inputCls} style={{ ...inputStyle, marginTop: 6 }}
+                    placeholder="或直接貼上圖片網址"
+                    value={form.media_url} onChange={e => setForm(f => ({ ...f, media_url: e.target.value }))} />
+                )}
+              </div>
 
               {/* 排程時間 */}
               <div>
@@ -238,6 +290,10 @@ export default function MarketingPage() {
                     </div>
                     {post.title && <div className="font-semibold text-green-900 text-sm">{post.title}</div>}
                     <div className="text-xs text-green-800 mt-1 line-clamp-2">{post.content}</div>
+                    {post.media_url && (
+                      <img src={post.media_url} alt="圖片"
+                        style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6, border: '1px solid #b5c265', marginTop: 4 }} />
+                    )}
                     <div className="text-xs text-green-600 mt-1">
                       🕐 {new Date(post.scheduled_at).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
                       {post.published_at && ` ✓ 已發 ${new Date(post.published_at).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}`}
