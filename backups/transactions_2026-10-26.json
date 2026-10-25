@@ -395,4 +395,10 @@
  {"id":"1782f0b0-c57a-4568-acdd-74e5701a3ad5","date":"2026-09-24","type":"cost","category":"餃子皮","amount":480,"note":"","created_at":"2026-09-24T14:59:15.734225+00:00","customer_count":0}, 
  {"id":"2adc9f75-57bf-4d90-9188-ca95fe36b8eb","date":"2026-09-24","type":"cost","category":"紙類雜項","amount":500,"note":"玉米罐頭","created_at":"2026-09-24T14:59:31.11629+00:00","customer_count":0}, 
  {"id":"b15b92de-e37c-4814-93d3-a8a78df4eaf0","date":"2026-09-24","type":"revenue","category":"Uber Eats 外送","amount":1155,"note":"[Uber Eats 原始訂單: $1,777 / 平台抽成 35%: -$622]","created_at":"2026-09-24T14:59:43.181797+00:00","customer_count":0}, 
- {"id":"dc1d7417-c91b-4d4a-9110-210d154a19af","date":"2026-09-24","type":"revenue","category":"LINE Pay","amount":838,"note":"","created_at":"2026-09-24T14:59:52.205996+00:00","customer_count":0}]
+ {"id":"dc1d7417-c91b-4d4a-9110-210d154a19af","date":"2026-09-24","type":"revenue","category":"LINE Pay","amount":838,"note":"","created_at":"2026-09-24T14:59:52.205996+00:00","customer_count":0}, 
+ {"id":"7a062cf4-c802-43a7-b13a-c3d3c0cdc3ca","date":"2026-09-25","type":"revenue","category":"門市現金","amount":1783,"note":"","created_at":"2026-09-25T13:57:11.24079+00:00","customer_count":0}, 
+ {"id":"1397c754-97c0-45f2-933b-f9698df3bd6b","date":"2026-09-25","type":"revenue","category":"LINE Pay","amount":389,"note":"","created_at":"2026-09-25T13:57:22.177433+00:00","customer_count":0}, 
+ {"id":"52741a9a-a5e1-467b-badb-6bbb0c1ba767","date":"2026-09-25","type":"revenue","category":"Uber Eats 外送","amount":687,"note":"[Uber Eats 原始訂單: $1,057 / 平台抽成 35%: -$370]","created_at":"2026-09-25T13:57:30.357171+00:00","customer_count":0}, 
+ {"id":"b200de37-aef1-41fd-9d6b-e339142202db","date":"2026-09-25","type":"cost","category":"豬肉","amount":2150,"note":"","created_at":"2026-09-25T13:57:40.783654+00:00","customer_count":0}, 
+ {"id":"754ed44e-2dcf-4f68-8aa3-2ab4dde68793","date":"2026-09-25","type":"cost","category":"餃子皮","amount":480,"note":"","created_at":"2026-09-25T13:57:46.444685+00:00","customer_count":0}, 
+ {"id":"8eb2bcd5-f578-419a-a457-7e8faae83b01","date":"2026-09-25","type":"cost","category":"桶裝瓦斯","amount":1080,"note":"","created_at":"2026-09-25T13:57:54.197702+00:00","customer_count":0}]
